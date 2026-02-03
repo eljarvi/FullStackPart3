@@ -53,12 +53,12 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const person = persons.find(x => x.id === id)
-    if (!person) {
-        return response.status(404).end()
-    }
-    response.json(person)
+    Person.findById(request.params.id).then(person => {
+        if (!person) {
+            return response.status(404).end()
+        }
+        response.json(person)
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -69,9 +69,6 @@ app.delete('/api/persons/:id', (request, response) => {
     response.status(204).end()
 })
 
-const generateId = () => {
-    return String(Math.floor(Math.random() * 1000000))
-}
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
@@ -83,15 +80,14 @@ app.post('/api/persons', (request, response) => {
     } else if (persons.some(x => x.name === body.name)) {
         return response.status(400).json({ error: `${body.name} is already added to phonebook` })
     }
-    const person = {
-        "name": body.name,
-        "number": body.number,
-        "id": generateId()
-    }
+    const person = new Person({
+        name: body.name,
+        number: body.number
+    })
 
-    persons = persons.concat(person)
-    response.json(person)
-
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
 const PORT = process.env.PORT
