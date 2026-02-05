@@ -79,6 +79,10 @@ const App = () => {
           setPersons(persons.concat(person))
           notify(`Added ${person.name} to the phonebook`)
         })
+        .catch(error => {
+          console.log(error.response.data)
+          notifyError(error.response.data.error)
+        })
       setNewName('')
       setNewNumber('')
     }
